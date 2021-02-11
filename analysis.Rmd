@@ -1,0 +1,58 @@
+---
+title: "Initial analysis"
+author: "Courtney Hilton"
+date: "11/02/2021"
+output: html_document
+---
+
+```{r load_libs_and_data, include=FALSE}
+# Set default .rmd parameters
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load libraries
+library(pacman)
+p_load(tidyverse,
+       readxl,
+       here)
+
+# Load raw data (questionnaire results)
+raw_data <- read_excel(here("data", "questionnaire_results.xlsx"))
+
+```
+
+```{r clean_data}
+# create vector of question names
+question_items <- colnames(raw_data)[8:38]
+
+# removing random escaped characters
+question_items <- gsub("\n","",question_items,fixed=T)
+question_items <- gsub("\r","",question_items,fixed=T)
+
+# rename covariates
+data1 <- raw_data %>% 
+  as_tibble() %>% 
+  select(1:7) %>% 
+  rename(
+     above_18 = 1,
+     username = 2, 
+     age = 3, 
+     gender = 4, 
+     country = 5,
+     how_often_play_chess = 6,
+     how_often_study_chess = 7) 
+
+# rename question columns
+data2 <- raw_data %>% 
+  as_tibble() %>% 
+  select(8:40) %>% 
+  rename(Q = 1:31,
+         date_completed = 32,
+         token = 33)
+
+# combine
+data_clean <- bind_cols(data1,data2)
+# remove temp variables
+rm(data1,data2)
+
+```
+
