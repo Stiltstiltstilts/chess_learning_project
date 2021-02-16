@@ -7,16 +7,24 @@ output: html_document
 
 ```{r load_libs_and_data, include=FALSE}
 # Set default .rmd parameters
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, echo = FALSE)
 
 # Load libraries
 library(pacman)
 p_load(tidyverse,
+       patchwork,
        readxl,
        here)
 
 # Load raw data (questionnaire results)
 raw_data <- read_excel(here("data", "questionnaire_results.xlsx"))
+
+# Custom plotting theme
+custom_theme <- theme_bw() + 
+  theme(panel.grid.minor.x = element_blank(),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(color = "grey30"),
+        plot.title = element_text(size = 18, face = "bold"))
 
 ```
 
@@ -54,5 +62,71 @@ data_clean <- bind_cols(data1,data2)
 # remove temp variables
 rm(data1,data2)
 
+# Checking that all participants are over 18: YES THEY ARE
+# unique(data_clean$above_18)
+# removing that column
+data_clean <- select(data_clean, -above_18)
+
 ```
+
+
+```{r ages_plot}
+
+ggplot(data_clean,
+       aes(x = age, fill = gender)) +
+  geom_histogram(stat = "count") + 
+  labs(title = "Who are our survey respondants?", 
+       x = "Age (years)", y = "# participants") +
+  custom_theme
+
+```
+
+```{r countries_plot}
+
+countries <- data_clean %>% 
+  count(country) %>% 
+  arrange(desc(n)) %>% 
+  add_row(country = "combined countries with < 10 participants", n = sum(.$n <= 10))
+
+
+ggplot(filter(countries, n > 10),
+       aes(x = reorder(country, n), y = n, fill = country)) +
+  geom_bar(stat='identity') +
+  guides(fill = FALSE) +
+  coord_flip() + 
+  labs(title = "Where do our participants come from?",
+       y = "number of participants", 
+       x = "Countries") +
+  custom_theme
+
+```
+
+
+```{r chess_engagement}
+
+# how often play chess
+play_plot <- ggplot(data_clean,
+       aes(x = how_often_play_chess)) +
+  geom_histogram(stat = "count", fill = "#0350df") + 
+  coord_flip() +
+  labs(title = "How often do they play chess?", 
+       x = "", y = "# participants") +
+  custom_theme
+
+# how often study chess 
+study_plot <- ggplot(data_clean,
+       aes(x = how_often_study_chess)) +
+  geom_histogram(stat = "count", fill = "#d8000c") + 
+  coord_flip() +
+  labs(title = "How often do they study chess??", 
+       x = "", y = "# participants") +
+  custom_theme
+
+
+play_plot / study_plot
+
+```
+
+
+
 
