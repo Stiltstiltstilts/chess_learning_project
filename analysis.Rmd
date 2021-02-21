@@ -5,6 +5,12 @@ date: "11/02/2021"
 output: html_document
 ---
 
+
+Oooh, should look at - https://cjvanlissa.github.io/tidySEM/
+
+also - https://lmudge13.github.io/sample_code/likert_graphs.html
+
+
 ```{r load_libs_and_data, include=FALSE}
 # Set default .rmd parameters
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, echo = FALSE)
@@ -14,10 +20,11 @@ library(pacman)
 p_load(tidyverse,
        patchwork,
        readxl,
-       here)
+       here,
+       ggtext)
 
 # Load raw data (questionnaire results)
-raw_data <- read_excel(here("data", "questionnaire_results.xlsx"))
+raw_data <- read_excel(here::here("data", "questionnaire_results.xlsx"))
 
 # Custom plotting theme
 custom_theme <- theme_bw() + 
@@ -67,6 +74,22 @@ rm(data1,data2)
 # removing that column
 data_clean <- select(data_clean, -above_18)
 
+
+
+data_clean$how_often_play_chess <- factor(data_clean$how_often_play_chess, 
+                                          levels = c("Less than once per week",
+                                                     "Once per week",
+                                                     "Two times per week",
+                                                     "More than three times per week",
+                                                     "Everyday"))
+
+data_clean$how_often_study_chess <- factor(data_clean$how_often_study_chess, 
+                                          levels = c("Less than once per week",
+                                                     "Once per week",
+                                                     "Two times per week",
+                                                     "More than three times per week",
+                                                     "Everyday"))
+
 ```
 
 
@@ -77,7 +100,12 @@ ggplot(data_clean,
   geom_histogram(stat = "count") + 
   labs(title = "Who are our survey respondants?", 
        x = "Age (years)", y = "# participants") +
-  custom_theme
+  custom_theme + 
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(color = 'grey', 
+                                          linetype = 'dotted'),
+        panel.grid.minor.y = element_line(color = 'grey', 
+                                          linetype = 'dotted'))
 
 ```
 
@@ -90,43 +118,47 @@ countries <- data_clean %>%
 
 
 ggplot(filter(countries, n > 10),
-       aes(x = reorder(country, n), y = n, fill = country)) +
-  geom_bar(stat='identity') +
+       aes(x = reorder(country, n), y = n)) +
+  geom_bar(stat='identity', fill = "purple") +
   guides(fill = FALSE) +
   coord_flip() + 
   labs(title = "Where do our participants come from?",
-       y = "number of participants", 
+       y = "# participants", 
        x = "Countries") +
   custom_theme
 
 ```
 
 
-```{r chess_engagement}
+```{r chess_engagement_plot}
 
 # how often play chess
 play_plot <- ggplot(data_clean,
        aes(x = how_often_play_chess)) +
   geom_histogram(stat = "count", fill = "#0350df") + 
   coord_flip() +
-  labs(title = "How often do they play chess?", 
+  labs(title = "How often do they <i style='color:#0350df;'>play</i> chess?", 
        x = "", y = "# participants") +
-  custom_theme
+  custom_theme + 
+  theme(plot.title = ggtext::element_markdown())
 
 # how often study chess 
 study_plot <- ggplot(data_clean,
        aes(x = how_often_study_chess)) +
   geom_histogram(stat = "count", fill = "#d8000c") + 
   coord_flip() +
-  labs(title = "How often do they study chess??", 
+  labs(title = "How often do they <i style='color:#d8000c;'>study</i> chess?", 
        x = "", y = "# participants") +
-  custom_theme
-
+  custom_theme +
+  theme(plot.title = ggtext::element_markdown())
 
 play_plot / study_plot
 
 ```
 
+```{r questionnaire_plots}
+
+```
 
 
 
