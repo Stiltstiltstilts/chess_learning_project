@@ -5,12 +5,6 @@ date: "11/02/2021"
 output: html_document
 ---
 
-
-Oooh, should look at - https://cjvanlissa.github.io/tidySEM/
-
-also - https://lmudge13.github.io/sample_code/likert_graphs.html
-
-
 ```{r load_libs_and_data, include=FALSE}
 # Set default .rmd parameters
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, echo = FALSE)
@@ -21,74 +15,28 @@ p_load(tidyverse,
        patchwork,
        readxl,
        here,
-       ggtext)
+       ggtext,
+       likert)
 
-# Load raw data (questionnaire results)
-raw_data <- read_excel(here::here("data", "questionnaire_results.xlsx"))
+# IF not run preprocessing script yet, uncomment and run the below line
+#source(here::here("analysis", "preprocessing_questionnaire.R"))
 
-# Custom plotting theme
+# Load preprocessed data
+load(here::here("data", "preprocessed_questionnaire.RData"))
+
+
+#Oooh, should look at - https://cjvanlissa.github.io/tidySEM/
+#also - https://lmudge13.github.io/sample_code/likert_graphs.html
+
+```
+
+```{r custom_plotting_themes}
+
 custom_theme <- theme_bw() + 
   theme(panel.grid.minor.x = element_blank(),
         legend.title = element_text(size = 12),
         legend.text = element_text(color = "grey30"),
         plot.title = element_text(size = 18, face = "bold"))
-
-```
-
-```{r clean_data}
-# create vector of question names
-question_items <- colnames(raw_data)[8:38]
-
-# removing random escaped characters
-question_items <- gsub("\n","",question_items,fixed=T)
-question_items <- gsub("\r","",question_items,fixed=T)
-
-# rename covariates
-data1 <- raw_data %>% 
-  as_tibble() %>% 
-  select(1:7) %>% 
-  rename(
-     above_18 = 1,
-     username = 2, 
-     age = 3, 
-     gender = 4, 
-     country = 5,
-     how_often_play_chess = 6,
-     how_often_study_chess = 7) 
-
-# rename question columns
-data2 <- raw_data %>% 
-  as_tibble() %>% 
-  select(8:40) %>% 
-  rename(Q = 1:31,
-         date_completed = 32,
-         token = 33)
-
-# combine
-data_clean <- bind_cols(data1,data2)
-# remove temp variables
-rm(data1,data2)
-
-# Checking that all participants are over 18: YES THEY ARE
-# unique(data_clean$above_18)
-# removing that column
-data_clean <- select(data_clean, -above_18)
-
-
-
-data_clean$how_often_play_chess <- factor(data_clean$how_often_play_chess, 
-                                          levels = c("Less than once per week",
-                                                     "Once per week",
-                                                     "Two times per week",
-                                                     "More than three times per week",
-                                                     "Everyday"))
-
-data_clean$how_often_study_chess <- factor(data_clean$how_often_study_chess, 
-                                          levels = c("Less than once per week",
-                                                     "Once per week",
-                                                     "Two times per week",
-                                                     "More than three times per week",
-                                                     "Everyday"))
 
 ```
 
@@ -156,9 +104,22 @@ play_plot / study_plot
 
 ```
 
-```{r questionnaire_plots}
 
+# Questionnaire responses
+## This shows the questions ordered by the percentage of people that agreed or disagreed with the question
+### (because, why not?)
+
+```{r likert_plots, fig.width = 8, fig.height = 20}
+
+item_plots <- plot(likert(questions_named), wrap = 30, clip = "off")
+
+item_plots
 ```
+
+
+
+
+
 
 
 
