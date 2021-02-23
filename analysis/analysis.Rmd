@@ -2,12 +2,14 @@
 title: "Initial analysis"
 author: "Courtney Hilton"
 date: "11/02/2021"
-output: html_document
+output: 
+  html_document:
+    theme: lumen
 ---
 
 ```{r load_libs_and_data, include=FALSE}
 # Set default .rmd parameters
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, echo = FALSE, fig.align = "center")
 
 # Load libraries
 library(pacman)
@@ -70,9 +72,9 @@ ggplot(filter(countries, n > 10),
   geom_bar(stat='identity', fill = "purple") +
   guides(fill = FALSE) +
   coord_flip() + 
-  labs(title = "Where do our participants come from?",
+  labs(title = "Where are they from?",
        y = "# participants", 
-       x = "Countries") +
+       x = "") +
   custom_theme
 
 ```
@@ -105,9 +107,7 @@ play_plot / study_plot
 ```
 
 
-# Questionnaire responses
-## This shows the questions ordered by the percentage of people that agreed or disagreed with the question
-### (because, why not?)
+# Questionnaire responses **ordered** by agreement
 
 ```{r likert_plots, fig.width = 8, fig.height = 20}
 

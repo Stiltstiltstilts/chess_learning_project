@@ -15,12 +15,13 @@ raw_data <- read_excel(here::here("data", "questionnaire_results.xlsx"))
 
 # create vector of question names
 question_items <- colnames(raw_data)[8:38]
-# removing example text in brackets etc
-question_items_shorter <- gsub("\\(.*?\\)", "", question_items)
 
 # removing random escaped characters
 question_items <- gsub("\n","",question_items,fixed=T)
 question_items <- gsub("\r","",question_items,fixed=T)
+# removing example text in brackets and extra spaces
+question_items_shorter <- str_trim(gsub("\\(.*?\\)", "", question_items))
+question_items_shorter <- gsub(" \\.", ".", question_items_shorter)
 
 # clean covariates
 covariates <- raw_data %>% 
