@@ -7,11 +7,15 @@ output:
     theme: lumen
 ---
 
-```{r load_libs_and_data, include=FALSE}
-# Set default .rmd parameters
+```{r rmd_params}
+
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, echo = FALSE, fig.align = "center")
 
-# Load libraries
+```
+
+
+```{r load_libraries}
+
 library(pacman)
 p_load(tidyverse,
        patchwork,
@@ -19,26 +23,37 @@ p_load(tidyverse,
        here,
        ggtext,
        likert)
-
-# IF not run preprocessing script yet, uncomment and run the below line
-#source(here::here("analysis", "preprocessing_questionnaire.R"))
-
-# Load preprocessed data
-load(here::here("data", "preprocessed_questionnaire.RData"))
-
-
 #Oooh, should look at - https://cjvanlissa.github.io/tidySEM/
 #also - https://lmudge13.github.io/sample_code/likert_graphs.html
 
 ```
 
+```{r load_data}
+
+# checks if preprocessed data exists, if not: runs script
+# (!!you should also run script if you have updated the data)
+if (!file.exists(here("data", "preprocessed_questionnaire.RData"))) {
+  source(here("analysis", "preprocessing_questionnaire.R"))
+}
+
+# Load preprocessed data
+load(here("data", "preprocessed_questionnaire.RData"))
+
+```
+
+
+
 ```{r custom_plotting_themes}
 
+# create clean custom theme
 custom_theme <- theme_bw() + 
   theme(panel.grid.minor.x = element_blank(),
         legend.title = element_text(size = 12),
         legend.text = element_text(color = "grey30"),
         plot.title = element_text(size = 18, face = "bold"))
+
+# set as default
+theme_set(custom_theme)
 
 ```
 
@@ -50,7 +65,6 @@ ggplot(data_clean,
   geom_histogram(stat = "count") + 
   labs(title = "Who are our survey respondants?", 
        x = "Age (years)", y = "# participants") +
-  custom_theme + 
   theme(panel.grid.major.x = element_blank(),
         panel.grid.major.y = element_line(color = 'grey', 
                                           linetype = 'dotted'),
@@ -74,8 +88,8 @@ ggplot(filter(countries, n > 10),
   coord_flip() + 
   labs(title = "Where are they from?",
        y = "# participants", 
-       x = "") +
-  custom_theme
+       x = "")
+
 
 ```
 
@@ -89,7 +103,6 @@ play_plot <- ggplot(data_clean,
   coord_flip() +
   labs(title = "How often do they <i style='color:#0350df;'>play</i> chess?", 
        x = "", y = "# participants") +
-  custom_theme + 
   theme(plot.title = ggtext::element_markdown())
 
 # how often study chess 
@@ -99,7 +112,6 @@ study_plot <- ggplot(data_clean,
   coord_flip() +
   labs(title = "How often do they <i style='color:#d8000c;'>study</i> chess?", 
        x = "", y = "# participants") +
-  custom_theme +
   theme(plot.title = ggtext::element_markdown())
 
 play_plot / study_plot
