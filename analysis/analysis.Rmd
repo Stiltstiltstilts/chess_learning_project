@@ -1,13 +1,13 @@
 ---
 title: "Initial analysis"
 author: "Courtney Hilton"
-date: "11/02/2021"
+date: '`r Sys.Date()`'
 output: 
   html_document:
     theme: lumen
 ---
 
-```{r rmd_params}
+```{r rmd_params, include=F}
 
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, echo = FALSE, fig.align = "center")
 
@@ -22,7 +22,10 @@ p_load(tidyverse,
        readxl,
        here,
        ggtext,
-       likert)
+       likert,
+       tidySEM, # devtools::install_github("cjvanlissa/tidySEM")
+       lavaan) 
+
 #Oooh, should look at - https://cjvanlissa.github.io/tidySEM/
 #also - https://lmudge13.github.io/sample_code/likert_graphs.html
 
@@ -55,8 +58,13 @@ custom_theme <- theme_bw() +
 # set as default
 theme_set(custom_theme)
 
+chessable_red <- "#d8000c"
+chessable_blue <- "#0350df"
+
 ```
 
+
+<div style="margin: auto; height=100px;width=300px;"><img src="/Users/courtneyhilton/git/chess_learn/data/chessable_logo.png"></img> </div>
 
 ```{r ages_plot}
 
@@ -76,8 +84,7 @@ ggplot(data_clean,
 ```{r countries_plot}
 
 countries <- data_clean %>% 
-  count(country) %>% 
-  arrange(desc(n)) %>% 
+  count(country, sort=T) %>% 
   add_row(country = "combined countries with < 10 participants", n = sum(.$n <= 10))
 
 
@@ -127,6 +134,78 @@ item_plots <- plot(likert(questions_named), wrap = 30, clip = "off")
 
 item_plots
 ```
+
+
+```{r exploring_new_data}
+
+data <- read_csv(here("data", "science_stat_result.csv"))
+
+user_accuracy <- data %>% 
+  group_by(uname) %>% 
+  summarise(accuracy = mean(accuracy), n_chapters = n())
+
+chapter_accuracy <- data %>% 
+  group_by(chapter) %>% 
+  summarise(accuracy = mean(accuracy, n_users = n()))
+
+course_accuracy <- data %>% 
+  group_by(course) %>% 
+  summarise(accuracy = mean(accuracy), n_things = n())
+
+```
+
+
+```{r participant_accuracy}
+
+ggplot(user_accuracy, aes(x = accuracy)) + 
+  geom_histogram(color = chessable_red, fill = "grey90") +
+  labs(x = "accuracy (%)", title = "Accuracy of participants \nover all their courses")
+
+```
+
+
+```{r chapter_accuracy}
+
+ggplot(chapter_accuracy, aes(x = accuracy)) + 
+  geom_histogram(color = chessable_blue, fill = "grey90") +
+  labs(x = "accuracy (%)", title = "Accuracy over chapters")
+
+```
+
+```{r course_accuracy}
+
+ggplot(course_accuracy, aes(x = accuracy)) + 
+  geom_histogram(color = chessable_red, fill = "grey90") +
+  labs(x = "accuracy (%)", title = "Accuracy over courses")
+
+```
+
+
+```{r}
+
+data %>% 
+  group_by(course) %>% 
+  summarise(n = n()) %>% 
+  slice_max(order_by = n, n = 30)
+
+
+data %>% 
+  filter(course == "Winning Chess Tactics") %>% 
+  view()
+
+
+# find me
+data %>% 
+  filter(uname == "Stiltstiltstilts") %>% 
+  view()
+
+```
+
+
+
+
+
+
 
 
 

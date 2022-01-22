@@ -1,0 +1,59 @@
+---
+title: "test"
+author: "Courtney Hilton"
+date: "07/04/2021"
+output: html_document
+---
+
+
+
+
+
+```{r SEM}
+
+model <- tidy_sem(questions)
+
+
+```
+
+```{r}
+
+test <- cor(questions)
+
+
+corrplot(test)
+```
+
+```{r}
+
+pca_version <- prcomp(questions, scale = TRUE,center = TRUE)
+
+# Eigenvalues
+eig.val <- get_eigenvalue(pca_version)
+eig.val
+```
+
+```{r}
+
+fviz_eig(pca_version,addlabels = TRUE, ylim = c(0, 50))
+```
+
+```{r}
+fviz_cos2(pca_version, choice = "var", axes = 1:2)
+```
+
+```{r}
+
+var <- get_pca_var(pca_version)
+corrplot(var$contrib, is.corr=FALSE)
+```
+
+
+```{r}
+fviz_pca_var(pca_version,
+             col.var = "contrib", # Color by contributions to the PC
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+             )
+
+```
